@@ -4,10 +4,10 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 
-namespace Alexa.My.NET.PersistentAttributes
+namespace Alexa.My.NET.PersistentAttributes.DynamoDB
 {
     /// <summary>
-    /// DynamoDBを扱うクラスをシングルトンとして実装
+    /// 
     /// </summary>
     public class AttributesManager
     {
