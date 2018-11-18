@@ -4,7 +4,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 
-namespace Alexa.My.NET.PersistentAttributes.DynamoDB
+namespace Alexa.PersistentAttributes.DynamoDB
 {
     /// <summary>
     /// 
@@ -36,8 +36,8 @@ namespace Alexa.My.NET.PersistentAttributes.DynamoDB
 
         }
 
- 
-        
+
+
 
 
         /// <summary>
@@ -122,12 +122,46 @@ namespace Alexa.My.NET.PersistentAttributes.DynamoDB
                 };
 
                 //テーブル作成
-                var result = Client.CreateTableAsync(request).Result;
+                Client.CreateTableAsync(request).Wait();
+
+                //テーブルの使用準備ができるまで待つ必要がある。
+                //テーブル作成リクエストを送って、処理が戻ってきても、テーブルが利用可能になるまで数秒かかるのね(´・ω・｀)
+                WaitUntilTableReady();
             }
+
 
 
             //テーブル接続
             this.ConnectTable();
+        }
+
+        /// <summary>
+        /// テーブルが利用可能になるまで待つ。
+        /// </summary>
+        private void WaitUntilTableReady()
+        {
+            string status = null;
+
+            do
+            {
+                System.Threading.Thread.Sleep(1000); //3000ミリ秒待つ
+
+                try
+                {
+                    var res = this.Client.DescribeTableAsync(new DescribeTableRequest
+                    {
+                        TableName = this.TableName
+                    }).Result;
+
+                    status = res.Table.TableStatus;
+                }
+                catch (ResourceNotFoundException e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
+
+            } while (status!=TableStatus.ACTIVE);
         }
 
         /// <summary>
